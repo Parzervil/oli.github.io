@@ -1,0 +1,688 @@
+
+```css
+/* ============================================
+   羽毛球竞技系统 Design Tokens V3.1
+   基于数值设计：三层乘区硬封顶 + STA/FOC双资源
+   ============================================ */
+
+:root {
+  /* 主色调 - 竞技蓝（取代学术紫） */
+  --primary-color: #3498db;      /* 主品牌色 - 竞技蓝 */
+  --primary-light: #74b9ff;      /* 高亮/悬停 */
+  --primary-dark: #2980b9;       /* 按下状态 */
+  
+  /* 功能色 - 体育竞技语义 */
+  --success-color: #00b894;      /* 得分/优势 */
+  --warning-color: #fdcb6e;      /* 警告/赛点 */
+  --danger-color: #e74c3c;       /* 失误/出界 */
+  --info-color: #74b9ff;         /* 信息/技术统计 */
+  --zone-color: #fd79a8;         /* ZONE模式 - 粉紫强调 */
+  
+  /* 乘区可视化专用色（三层乘区HUD） */
+  --layer1-env: #00cec9;         /* 环境层 - 青绿 */
+  --layer2-status: #fdcb6e;      /* 状态层 - 金黄 */
+  --layer3-trait: #a29bfe;       /* 词条层 - 淡紫 */
+  --multiplier-cap: #e17055;     /* 硬封顶警示 - 橙红 */
+  
+  /* 资源槽颜色 */
+  --sta-color: #00b894;          /* 体力 - 绿 */
+  --foc-color: #e84393;          /* 心态/专注 - 玫红 */
+  
+  /* 选手类型色 */
+  --offensive-color: #e74c3c;    /* 进攻型 - 红 */
+  --technical-color: #3498db;    /* 技巧型 - 蓝 */
+  --defensive-color: #00b894;    /* 防守型 - 绿 */
+  --balanced-color: #9b59b6;     /* 均衡型 - 紫 */
+  
+  /* 中性色系统 */
+  --text-primary: #2d3436;
+  --text-secondary: #636e72;
+  --bg-color: #f8f9fa;
+  --light-bg: rgba(255,255,255,0.7);
+  --border-color: #dfe6e9;
+  
+  /* 安全封顶标识 */
+  --cap-warning-bg: rgba(231, 76, 60, 0.1);
+  --cap-warning-border: rgba(231, 76, 60, 0.3);
+}
+
+/* ============================================
+   布局架构 - 比赛界面三栏布局
+   ============================================ */
+
+.game-container {
+  display: grid;
+  gap: 16px;
+  padding: 12px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 桌面端：选手信息 | 比赛场地 | 战术面板 */
+@media (min-width: 1024px) {
+  .game-container {
+    grid-template-columns: 300px 1fr 320px;
+    grid-template-areas: 
+      "player court tactics"
+      "stats court log";
+  }
+  .player-panel { grid-area: player; }
+  .court-panel { grid-area: court; }
+  .tactics-panel { grid-area: tactics; }
+  .stats-panel { grid-area: stats; }
+  .log-panel { grid-area: log; }
+}
+
+/* ============================================
+   组件库 - 羽毛球竞技专用组件
+   ============================================ */
+
+/* 1. 选手属性卡（取代角色卡） */
+.player-card {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(12px);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.player-card.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  transform: translateY(-4px);
+}
+
+/* 打法类型标识 */
+.playstyle-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.playstyle-offensive { background: rgba(231, 76, 60, 0.15); color: var(--offensive-color); }
+.playstyle-technical { background: rgba(52, 152, 219, 0.15); color: var(--technical-color); }
+.playstyle-defensive { background: rgba(0, 184, 148, 0.15); color: var(--defensive-color); }
+.playstyle-balanced { background: rgba(155, 89, 182, 0.15); color: var(--balanced-color); }
+
+/* 2. 五维属性条（取代学术属性） */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.stat-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.stat-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* 属性条背景 */
+.progress-track {
+  height: 6px;
+  background: var(--light-bg);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* PHY力量 - 红 */
+.stat-phy .progress-fill { background: linear-gradient(90deg, #ff7675, #d63031); }
+/* MOV移动 - 蓝 */
+.stat-mov .progress-fill { background: linear-gradient(90deg, #74b9ff, #0984e3); }
+/* TEC技术 - 青 */
+.stat-tec .progress-fill { background: linear-gradient(90deg, #55efc4, #00b894); }
+/* TAC战术 - 紫 */
+.stat-tac .progress-fill { background: linear-gradient(90deg, #a29bfe, #6c5ce7); }
+/* MEN心理 - 粉 */
+.stat-men .progress-fill { background: linear-gradient(90deg, #fd79a8, #e84393); }
+
+/* 3. 双资源槽系统（STA + FOC） */
+.resource-bars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+  padding: 12px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.resource-bar {
+  position: relative;
+}
+
+.resource-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* STA体力条 - 绿色渐变 */
+.sta-bar .progress-fill {
+  background: linear-gradient(90deg, #55efc4, #00b894);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* FOC心态条 - 玫红渐变，ZONE模式时脉冲 */
+.foc-bar .progress-fill {
+  background: linear-gradient(90deg, #fd79a8, #e84393);
+  transition: width 0.4s ease;
+}
+
+/* ZONE激活时FOC条动画 */
+.foc-bar.zone-active .progress-fill {
+  animation: pulse-foc 2s infinite;
+  box-shadow: 0 0 10px rgba(253, 121, 168, 0.5);
+}
+
+@keyframes pulse-foc {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* 体力惩罚区间标识（<30%） */
+.sta-bar.low-sta .progress-track {
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  background: rgba(231, 76, 60, 0.05);
+}
+
+/* 4. 三层乘区HUD（核心数值可视化） */
+.multiplier-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
+}
+
+.multiplier-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* 硬封顶警示样式 */
+.multiplier-total.capped {
+  color: var(--multiplier-cap);
+  background: var(--cap-warning-bg);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--cap-warning-border);
+}
+
+.multiplier-cap-label {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.layer-breakdown {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.layer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.5);
+}
+
+.layer-label {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.layer-value {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.layer-1 { color: var(--layer1-env); }
+.layer-2 { color: var(--layer2-status); }
+.layer-3 { color: var(--layer3-trait); }
+
+/* 封顶标记 */
+.layer-value.capped::after {
+  content: "MAX";
+  font-size: 0.55rem;
+  margin-left: 2px;
+  color: var(--danger-color);
+  vertical-align: super;
+}
+
+/* 5. 比赛动作槽（取代论文槽） */
+.action-slots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.action-card {
+  background: var(--light-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.action-card:active {
+  transform: translateY(0);
+}
+
+/* 动作类型色标 */
+.action-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 12px 0 0 12px;
+}
+
+.action-smash::before { background: var(--offensive-color); }      /* 杀球 - 红 */
+.action-drop::before { background: var(--technical-color); }      /* 吊球 - 蓝 */
+.action-clear::before { background: var(--defensive-color); }      /* 高远 - 绿 */
+.action-net::before { background: var(--balanced-color); }          /* 搓球 - 紫 */
+.action-lift::before { background: #95a5a6; }                       /* 挑球 - 灰 */
+
+/* 动作数据展示 */
+.action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-left: 8px;
+}
+
+.action-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.action-cost {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* 动作倍率展示（V3.1数值） */
+.action-multiplier {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding-left: 8px;
+  margin-top: 4px;
+}
+
+.mult-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.mult-label {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+/* 体力不足时禁用 */
+.action-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+/* 6. ZONE模式指示器 */
+.zone-indicator {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(253,121,168,0.2), rgba(232,67,147,0.1));
+  border: 2px solid var(--zone-color);
+  border-radius: 9999px;
+  margin-bottom: 12px;
+  animation: pulse-zone 2s infinite;
+}
+
+.zone-indicator.active {
+  display: inline-flex;
+}
+
+@keyframes pulse-zone {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(253,121,168,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(253,121,168,0.1); }
+}
+
+.zone-text {
+  font-weight: 700;
+  color: var(--zone-color);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.zone-turns {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+/* 7. 状态标签系统（取代Buff标签） */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid;
+  margin: 2px;
+}
+
+/* Layer2状态类型 */
+.status-zone {
+  background: rgba(253, 121, 168, 0.15);
+  border-color: rgba(253, 121, 168, 0.4);
+  color: #d63384;
+  animation: pulse 2s infinite;
+}
+
+.status-momentum {
+  background: rgba(253, 203, 110, 0.2);
+  border-color: rgba(253, 203, 110, 0.5);
+  color: #856404;
+}
+
+.status-calm {
+  background: rgba(108, 117, 125, 0.1);
+  border-color: rgba(108, 117, 125, 0.3);
+  color: #6c757d;
+  border-style: dashed;
+}
+
+/* Layer1环境类型 */
+.status-home {
+  background: rgba(0, 206, 201, 0.1);
+  border-color: rgba(0, 206, 201, 0.3);
+  color: #00b894;
+}
+
+/* 词条标签（Layer3） */
+.trait-tag {
+  background: rgba(162, 155, 254, 0.1);
+  border-color: rgba(162, 155, 254, 0.3);
+  color: #6c5ce7;
+  font-size: 0.7rem;
+}
+
+/* 8. 回合日志系统（羽毛球专用事件） */
+.log-entry {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  animation: slide-in 0.3s ease-out;
+  border-left: 3px solid transparent;
+}
+
+/* 得分事件 - 绿色 */
+.log-entry.score {
+  background: rgba(0, 184, 148, 0.08);
+  border-left-color: var(--success-color);
+}
+
+/* 失误事件 - 红色 */
+.log-entry.error {
+  background: rgba(231, 76, 60, 0.08);
+  border-left-color: var(--danger-color);
+}
+
+/* 状态变更 - 蓝色 */
+.log-entry.status-change {
+  background: rgba(116, 185, 255, 0.08);
+  border-left-color: var(--info-color);
+}
+
+/* ZONE相关 - 粉色 */
+.log-entry.zone {
+  background: rgba(253, 121, 168, 0.08);
+  border-left-color: var(--zone-color);
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.log-turn {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.log-action {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.log-details {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* 数值变化高亮 */
+.stat-change-pos { color: var(--success-color); font-weight: 700; }
+.stat-change-neg { color: var(--danger-color); font-weight: 700; }
+
+/* 9. 比赛场地可视化（简易） */
+.court-display {
+  aspect-ratio: 2/1;
+  background: linear-gradient(180deg, #74b9ff 0%, #0984e3 100%);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 3px solid #2d3436;
+  margin-bottom: 16px;
+}
+
+/* 球场网格线 */
+.court-display::after {
+  content: '';
+  position: absolute;
+  inset: 10%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top: none;
+  border-bottom: none;
+}
+
+/* 比分展示 */
+.score-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.score-player {
+  text-align: center;
+}
+
+.score-name {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.score-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.score-separator {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+
+/* 赛点警示 */
+.score-match-point .score-value {
+  color: var(--danger-color);
+  animation: pulse 2s infinite;
+}
+
+/* 10. 特殊机制按钮 */
+.mechanic-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.mechanic-btn:hover:not(:disabled) {
+  background: var(--light-bg);
+  transform: translateY(-1px);
+}
+
+.mechanic-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+/* 医疗暂停按钮 */
+.btn-medical {
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.btn-medical:disabled::after {
+  content: "已使用";
+  font-size: 0.65rem;
+  margin-left: 4px;
+  color: var(--text-secondary);
+}
+
+/* 战术暂停按钮 */
+.btn-tactical {
+  border-color: var(--info-color);
+  color: var(--info-color);
+}
+
+/* ZONE按钮 */
+.btn-zone {
+  background: linear-gradient(135deg, #fd79a8, #e84393);
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(232, 67, 147, 0.3);
+}
+
+.btn-zone:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(232, 67, 147, 0.4);
+}
+
+.btn-zone.cooldown {
+  background: #b2bec3;
+  box-shadow: none;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .action-slots {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .resource-bars {
+    grid-template-columns: 1fr;
+  }
+  
+  .layer-breakdown {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  
+  .score-value {
+    font-size: 1.5rem;
+  }
+}
+```
+
