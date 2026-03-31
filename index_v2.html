@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羽球生涯 UI原型系统 v1.1 - 完善版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'comp-blue': '#2563EB',
+                        'risk-red': '#DC2626',
+                        'energy-gold': '#F59E0B',
+                        'growth-green': '#10B981',
+                        'phy-red': '#EF4444',
+                        'mov-blue': '#3B82F6',
+                        'tec-green': '#10B981',
+                        'tac-purple': '#8B5CF6',
+                        'men-orange': '#F97316',
+                        'bg-dark': '#0F172A',
+                        'bg-light': '#F8FAFC',
+                        'slate-850': '#1e293b',
+                    },
+                    fontFamily: {
+                        'display': ['Oswald', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'countdown': 'countdown 15s linear',
+                        'float': 'float 3s ease-in-out infinite',
+                        'shine': 'shine 2s linear infinite',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px #F59E0B, 0 0 10px #F59E0B' },
+                            '100%': { boxShadow: '0 0 20px #F59E0B, 0 0 30px #F59E0B' }
+                        },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        countdown: {
+                            '0%': { width: '100%' },
+                            '100%': { width: '0%' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        },
+                        shine: {
+                            '0%': { backgroundPosition: '-200% center' },
+                            '100%': { backgroundPosition: '200% center' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0F172A;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+            color: white;
+            overflow-x: hidden;
+        }
+        .font-display { font-family: 'Oswald', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-strong {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .glass-hover:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        
+        .vignette {
+            background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+        }
+        
+        .progress-striped {
+            background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+            background-size: 1rem 1rem;
+            animation: progress-move 1s linear infinite;
+        }
+        
+        @keyframes progress-move {
+            0% { background-position: 0 0; }
+            100% { background-position: 1rem 0; }
+        }
+        
+        .text-neon {
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .curve-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 2s ease-out forwards;
+        }
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+        
+        .zone-active {
+            animation: border-glow 1s ease-in-out infinite alternate;
+        }
+        @keyframes border-glow {
+            from { border-color: #F59E0B; box-shadow: 0 0 10px #F59E0B inset; }
+            to { border-color: #fbbf24; box-shadow: 0 0 20px #fbbf24 inset; }
+        }
+        
+        .capped {
+            position: relative;
+            color: #64748b;
+        }
+        .capped::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 2px;
+            background: #DC2626;
+            transform: rotate(-5deg);
+        }
+        
+        .tick-change {
+            animation: tick 0.3s ease-out;
+        }
+        @keyframes tick {
+            0% { transform: scale(1.2); color: #F59E0B; }
+            100% { transform: scale(1); }
+        }
+        
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tech-node {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tech-node.active {
+            transform: scale(1.02);
+        }
+        
+        .training-option {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .training-option:hover {
+            background: rgba(51, 65, 85, 0.9);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .training-option.selected {
+            border-color: currentColor;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F172A; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background-size: 200% 100%;
+            animation: shine 2s infinite;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-comp-blue rounded-lg flex items-center justify-center font-display font-bold text-lg">B</div>
+                    <span class="font-display text-2xl tracking-wide">羽球生涯 <span class="text-xs font-body text-slate-400 font-normal">v1.1 五维训练系统</span></span>
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="switchView('training')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-comp-blue text-white" data-view="training">
+                        训练中心
+                    </button>
+                    <button onclick="switchView('match')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:text-white hover:bg-slate-800" data-view="match">
+                        比赛实况
+                    </button>
+                    <button onclick="switchView('decision')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:text-white hover:bg-slate-800" data-view="decision">
+                        关键分决策
+                    </button>
+                    <button onclick="switchView('result')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:text-white hover:bg-slate-800" data-view="result">
+                        赛后结算
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+<div style="position: fixed; top: 80px; right: 20px; background: rgba(30,41,59,0.9); padding: 10px; border-radius: 8px; border: 1px solid #334155; z-index: 40;">
+  <div style="font-size: 12px; color: #94a3b8;">体力 STA</div>
+  <div style="font-size: 24px; font-family: 'Oswald', sans-serif; color: #F59E0B;" id="sta-value">100</div>
+</div>
+    <!-- Main Content Container -->
+    <main class="flex-1 pt-20 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full relative">
+        
+        <!-- View 1: Training Interface -->
+        <div id="view-training" class="view-section space-y-6">
+            <!-- Header Stats with Enhanced Visualization -->
+            <div class="grid grid-cols-5 gap-4 mb-6">
+                <div class="stat-card glass rounded-xl p-4 border-l-4 border-phy-red bg-gradient-to-br from-red-500/5 to-transparent relative overflow-hidden group cursor-pointer" onclick="focusTraining('PHY')">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-phy-red/10 rounded-full blur-xl -mr-4 -mt-4 transition-all group-hover:bg-phy-red/20"></div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">PHY 身体素质</div>
+                    <div class="font-display text-3xl text-phy-red mt-1" id="phy-value">PHY</div>
+                    <div class="mt-2 space-y-1">
+                        <div class="w-full bg-slate-800 rounded-full h-1.5">
+                            <div class="bg-phy-red h-1.5 rounded-full transition-all duration-500" style="width: 65%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>上限: 95</span>
+                            <span class="text-green-400">可提升</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass rounded-xl p-4 border-l-4 border-mov-blue bg-gradient-to-br from-blue-500/5 to-transparent relative overflow-hidden group cursor-pointer" onclick="focusTraining('MOV')">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-mov-blue/10 rounded-full blur-xl -mr-4 -mt-4 transition-all group-hover:bg-mov-blue/20"></div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">MOV 移动能力</div>
+                    <div class="font-display text-3xl text-mov-blue mt-1" id="mov-value">70</div>
+                    <div class="mt-2 space-y-1">
+                        <div class="w-full bg-slate-800 rounded-full h-1.5">
+                            <div class="bg-mov-blue h-1.5 rounded-full transition-all duration-500" style="width: 70%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>上限: 90</span>
+                            <span class="text-green-400">可提升</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass rounded-xl p-4 border-l-4 border-tec-green bg-gradient-to-br from-green-500/5 to-transparent relative overflow-hidden group cursor-pointer" onclick="focusTraining('TEC')">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-tec-green/10 rounded-full blur-xl -mr-4 -mt-4 transition-all group-hover:bg-tec-green/20"></div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">TEC 技术水平</div>
+                    <div class="font-display text-3xl text-tec-green mt-1" id="tec-value">75</div>
+                    <div class="mt-2 space-y-1">
+                        <div class="w-full bg-slate-800 rounded-full h-1.5">
+                            <div class="bg-tec-green h-1.5 rounded-full transition-all duration-500" style="width: 83%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>软上限: 90</span>
+                            <span class="text-amber-400">平台期</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass rounded-xl p-4 border-l-4 border-tac-purple bg-gradient-to-br from-purple-500/5 to-transparent relative overflow-hidden group cursor-pointer" onclick="focusTraining('TAC')">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-tac-purple/10 rounded-full blur-xl -mr-4 -mt-4 transition-all group-hover:bg-tac-purple/20"></div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">TAC 战术意识</div>
+                    <div class="font-display text-3xl text-tac-purple mt-1" id="tac-value">70</div>
+                    <div class="mt-2 space-y-1">
+                        <div class="w-full bg-slate-800 rounded-full h-1.5">
+                            <div class="bg-tac-purple h-1.5 rounded-full transition-all duration-500" style="width: 60%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>上限: 85</span>
+                            <span class="text-green-400">快速成长期</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass rounded-xl p-4 border-l-4 border-men-orange bg-gradient-to-br from-orange-500/5 to-transparent relative overflow-hidden group cursor-pointer" onclick="focusTraining('MEN')">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-men-orange/10 rounded-full blur-xl -mr-4 -mt-4 transition-all group-hover:bg-men-orange/20"></div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">MEN 心理素质</div>
+                    <div class="font-display text-3xl text-men-orange mt-1" id="men-value">55</div>
+                    <div class="mt-2 space-y-1">
+                        <div class="w-full bg-slate-800 rounded-full h-1.5">
+                            <div class="bg-men-orange h-1.5 rounded-full transition-all duration-500" style="width: 65%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>显示修正: +10</span>
+                            <span class="text-slate-400">成长缓慢</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-6 h-[calc(100vh-280px)] min-h-[600px]">
+                <!-- Left: Radar Chart -->
+                <div class="col-span-12 lg:col-span-3 glass rounded-2xl p-6 flex flex-col">
+                    <h3 class="font-display text-xl mb-4 text-slate-200">五维雷达图</h3>
+                    <div class="flex-1 flex items-center justify-center relative radar-container">
+                        <svg viewBox="0 0 200 200" class="w-full h-full max-w-[250px]">
+                            <!-- Background grid -->
+                            <polygon points="100,20 180,60 180,140 100,180 20,140 20,60" fill="none" stroke="#334155" stroke-width="1"/>
+                            <polygon points="100,40 160,66 160,134 100,160 40,134 40,66" fill="none" stroke="#334155" stroke-width="1"/>
+                            <polygon points="100,60 140,73 140,127 100,140 60,127 60,73" fill="none" stroke="#334155" stroke-width="1"/>
+                            
+                            <!-- Axis lines -->
+                            <line x1="100" y1="100" x2="100" y2="20" stroke="#475569" stroke-width="1"/>
+                            <line x1="100" y1="100" x2="180" y2="60" stroke="#475569" stroke-width="1"/>
+                            <line x1="100" y1="100" x2="180" y2="140" stroke="#475569" stroke-width="1"/>
+                            <line x1="100" y1="100" x2="100" y2="180" stroke="#475569" stroke-width="1"/>
+                            <line x1="100" y1="100" x2="20" y2="140" stroke="#475569" stroke-width="1"/>
+                            <line x1="100" y1="100" x2="20" y2="60" stroke="#475569" stroke-width="1"/>
+                            
+                            <!-- Labels -->
+                            <text x="100" y="15" text-anchor="middle" fill="#94a3b8" font-size="10">PHY</text>
+                            <text x="185" y="55" text-anchor="start" fill="#94a3b8" font-size="10">MOV</text>
+                            <text x="185" y="145" text-anchor="start" fill="#94a3b8" font-size="10">TEC</text>
+                            <text x="100" y="190" text-anchor="middle" fill="#94a3b8" font-size="10">TAC</text>
+                            <text x="15" y="145" text-anchor="end" fill="#94a3b8" font-size="10">MEN</text>
+                            
+                            <!-- Data polygon -->
+                            <polygon points="100,48 141,72 141,128 100,148 58,128" 
+                                     fill="rgba(37,99,235,0.3)" 
+                                     stroke="#2563EB" 
+                                     stroke-width="2"
+                                     class="drop-shadow-lg"/>
+                            
+                            <!-- Points with pulsing effect -->
+                            <circle cx="100" cy="48" r="3" fill="#ef4444" class="animate-pulse"/>
+                            <circle cx="141" cy="72" r="3" fill="#3b82f6" class="animate-pulse" style="animation-delay: 0.2s"/>
+                            <circle cx="141" cy="128" r="3" fill="#10b981" class="animate-pulse" style="animation-delay: 0.4s"/>
+                            <circle cx="100" cy="148" r="3" fill="#a855f7" class="animate-pulse" style="animation-delay: 0.6s"/>
+                            <circle cx="58" cy="128" r="3" fill="#f97316" class="animate-pulse" style="animation-delay: 0.8s"/>
+                        </svg>
+                    </div>
+                    <div class="mt-4 text-xs text-slate-400 text-center space-y-1">
+                        <div>CA综合战力: <span class="font-display text-xl text-comp-blue">69.25</span></div>
+                        <div class="text-slate-500 text-[10px]">PHY×0.3 + MOV×0.25 + TEC×0.3 + TAC×0.1 + MEN×0.05</div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="mt-4 pt-4 border-t border-slate-700 space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">本周剩余训练点</span>
+                            <span class="font-mono text-comp-blue">3/5</span>
+                        </div>
+                        <div class="flex gap-1">
+                            <div class="h-1.5 flex-1 bg-comp-blue rounded"></div>
+                            <div class="h-1.5 flex-1 bg-comp-blue rounded"></div>
+                            <div class="h-1.5 flex-1 bg-comp-blue rounded"></div>
+                            <div class="h-1.5 flex-1 bg-slate-700 rounded"></div>
+                            <div class="h-1.5 flex-1 bg-slate-700 rounded"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 进入比赛按钮 -->
+                    <button onclick="startMatch()" style="width: 100%; padding: 15px; background: #2563EB; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 20px; cursor: pointer; font-size: 16px;">
+                        进入周末决赛 →
+                    </button>
+                </div>
+
+                <!-- Center: Tabbed Interface (Tech Tree & Basic Training) -->
+                <div class="col-span-12 lg:col-span-6 glass rounded-2xl overflow-hidden flex flex-col">
+                    <!-- Tabs -->
+                    <div class="flex border-b border-slate-700 bg-slate-900/30">
+                        <button onclick="switchTrainingTab('tech')" id="tab-tech" class="flex-1 px-6 py-4 text-sm font-medium text-white border-b-2 border-comp-blue bg-slate-800/30 transition-colors">
+                            <span class="flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                                技术树 (Tech Tree)
+                            </span>
+                        </button>
+                        <button onclick="switchTrainingTab('basic')" id="tab-basic" class="flex-1 px-6 py-4 text-sm font-medium text-slate-400 hover:text-white border-b-2 border-transparent hover:bg-slate-800/20 transition-colors">
+                            <span class="flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                基础五维训练
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Content Area -->
+                    <div class="flex-1 overflow-y-auto p-6 relative">
+                        
+                        <!-- Tech Tree Panel -->
+                        <div id="panel-tech" class="space-y-4">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="font-display text-xl text-slate-200">多线技术树系统</h3>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span class="px-2 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700">当前分支: 杀球线</span>
+                                    <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">顿悟就绪</span>
+                                </div>
+                            </div>
+
+                            <!-- Multi-line Tech Tree Visualization -->
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <!-- Line 1: Attack (Active) -->
+                                <div class="col-span-1 space-y-3">
+                                    <div class="text-center text-xs text-amber-400 font-bold mb-2">进攻线</div>
+                                    
+                                    <div class="tech-node p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-center">
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs mb-1">✓</div>
+                                        <div class="text-xs font-bold text-slate-300">高远球</div>
+                                        <div class="text-[10px] text-slate-500">40/40</div>
+                                    </div>
+                                    
+                                    <div class="flex justify-center"><div class="w-0.5 h-4 bg-slate-600"></div></div>
+                                    
+                                    <div class="tech-node active p-3 rounded-lg bg-amber-500/10 border-2 border-amber-500/50 text-center relative">
+                                        <div class="absolute -top-2 -right-2 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center text-[8px] text-slate-900 font-bold animate-pulse">!</div>
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 text-xs mb-1">⚡</div>
+                                        <div class="text-xs font-bold text-amber-400">劈杀</div>
+                                        <div class="text-[10px] text-amber-400/70">75/90 +1.5</div>
+                                    </div>
+                                    
+                                    <div class="flex justify-center"><div class="w-0.5 h-4 bg-slate-600"></div></div>
+                                    
+                                    <div class="tech-node p-3 rounded-lg bg-slate-800/50 border border-slate-700 text-center opacity-60">
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-slate-700 flex items-center justify-center text-slate-500 text-xs mb-1">🔒</div>
+                                        <div class="text-xs font-bold text-slate-500">跳杀</div>
+                                        <div class="text-[10px] text-slate-600">需PHY≥70</div>
+                                    </div>
+                                </div>
+
+                                <!-- Line 2: Net Play -->
+                                <div class="col-span-1 space-y-3">
+                                    <div class="text-center text-xs text-blue-400 font-bold mb-2">网前线</div>
+                                    
+                                    <div class="tech-node p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-center">
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs mb-1">✓</div>
+                                        <div class="text-xs font-bold text-slate-300">挑球</div>
+                                        <div class="text-[10px] text-slate-500">35/35</div>
+                                    </div>
+                                    
+                                    <div class="flex justify-center"><div class="w-0.5 h-4 bg-slate-600"></div></div>
+                                    
+                                    <div class="tech-node p-3 rounded-lg bg-slate-800/50 border border-slate-700 text-center">
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-xs mb-1">○</div>
+                                        <div class="text-xs font-bold text-slate-300">搓球</div>
+                                        <div class="text-[10px] text-blue-400">65/80 +2.0</div>
+                                    </div>
+                                    
+                                    <div class="flex justify-center"><div class="w-0.5 h-4 bg-slate-600"></div></div>
+                                    
+                                    <div class="tech-node p-3 rounded-lg bg-slate-800/30 border border-slate-700 text-center opacity-50">
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-slate-600 text-xs mb-1">✦</div>
+                                        <div class="text-xs font-bold text-slate-600">勾对角</div>
+                                        <div class="text-[10px] text-slate-600">未解锁</div>
+                                    </div>
+                                </div>
+
+                                <!-- Line 3: Defense -->
+                                <div class="col-span-1 space-y-3">
+                                    <div class="text-center text-xs text-purple-400 font-bold mb-2">防守线</div>
+                                    
+                                    <div class="tech-node p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-center">
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs mb-1">✓</div>
+                                        <div class="text-xs font-bold text-slate-300">基础步伐</div>
+                                        <div class="text-[10px] text-slate-500">50/50</div>
+                                    </div>
+                                    
+                                    <div class="flex justify-center"><div class="w-0.5 h-4 bg-slate-600"></div></div>
+                                    
+                                    <div class="tech-node p-3 rounded-lg bg-slate-800/50 border border-slate-700 text-center">
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs mb-1">○</div>
+                                        <div class="text-xs font-bold text-slate-300">鱼跃救球</div>
+                                        <div class="text-[10px] text-purple-400">30/60 +1.2</div>
+                                    </div>
+                                    
+                                    <div class="flex justify-center"><div class="w-0.5 h-4 bg-slate-600"></div></div>
+                                    
+                                    <div class="tech-node p-3 rounded-lg bg-slate-800/30 border border-slate-700 text-center opacity-50">
+                                        <div class="w-8 h-8 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-slate-600 text-xs mb-1">🔒</div>
+                                        <div class="text-xs font-bold text-slate-600">反手抽球</div>
+                                        <div class="text-[10px] text-slate-600">需TEC≥70</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Selected Tech Info -->
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-amber-500/30">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h4 class="font-bold text-amber-400 flex items-center gap-2">
+                                            劈杀 (Smash)
+                                            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-[10px] border border-amber-500/30">平台期</span>
+                                        </h4>
+                                        <div class="text-xs text-slate-400 mt-1">进攻技术 | 威胁值系数 1.6 | STA消耗系数 1.2</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-display text-2xl text-amber-400">75<span class="text-sm text-slate-500">/90</span></div>
+                                        <div class="text-xs text-slate-500">距瓶颈 +15</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-3">
+                                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                        <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-2 rounded-full progress-striped" style="width: 83%"></div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-3 gap-3 text-xs">
+                                        <div class="p-2 bg-slate-800 rounded border border-slate-700">
+                                            <div class="text-slate-500 mb-1">当前收益</div>
+                                            <div class="font-mono text-amber-400">+1.5/次</div>
+                                        </div>
+                                        <div class="p-2 bg-slate-800 rounded border border-slate-700">
+                                            <div class="text-slate-500 mb-1">熟练补正</div>
+                                            <div class="font-mono text-slate-300">1.10x</div>
+                                        </div>
+                                        <div class="p-2 bg-slate-800 rounded border border-slate-700">
+                                            <div class="text-slate-500 mb-1">顿悟几率</div>
+                                            <div class="font-mono text-purple-400">30%</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/50 p-2 rounded">
+                                        <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/></svg>
+                                        <span>连续4次未提升，下次训练可能触发顿悟突破平台期</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Training Panel -->
+                        <div id="panel-basic" class="hidden space-y-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-display text-xl text-slate-200">基础五维专项训练</h3>
+                                <div class="text-xs text-slate-400">选择训练项目提升基础属性</div>
+                            </div>
+
+                            <!-- PHY Training -->
+                            <div class="training-category mb-4" data-stat="PHY">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-1 h-4 bg-phy-red rounded"></div>
+                                    <h4 class="font-bold text-phy-red">身体素质 (PHY) 训练</h4>
+                                    <span class="text-xs text-slate-500">当前: 65/95</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="training-option p-3 rounded-lg border border-slate-700 bg-slate-800/30 hover:border-phy-red/50" onclick="selectTraining(this, 'PHY', 'light')">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="text-sm font-bold text-slate-300">恢复性力量</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">安全</span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 space-y-1">
+                                            <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-400">-5</span></div>
+                                            <div class="flex justify-between"><span>PHY收益</span><span class="font-mono text-phy-red">+0.3~0.5</span></div>
+                                            <div class="flex justify-between"><span>受伤率</span><span class="font-mono text-green-400">0%</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="training-option p-3 rounded-lg border border-phy-red/30 bg-phy-red/5 selected" onclick="selectTraining(this, 'PHY', 'standard')">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="text-sm font-bold text-slate-200">核心力量训练</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">标准</span>
+                                        </div>
+                                        <div class="text-xs text-slate-400 space-y-1">
+                                            <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-300">-10</span></div>
+                                            <div class="flex justify-between"><span>PHY收益</span><span class="font-mono text-phy-red">+0.8~1.2</span></div>
+                                            <div class="flex justify-between"><span>受伤率</span><span class="font-mono text-amber-400">5%</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="training-option p-3 rounded-lg border border-slate-700 bg-slate-800/30 hover:border-phy-red/50" onclick="selectTraining(this, 'PHY', 'intense')">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="text-sm font-bold text-slate-300">极限负重</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded bg-risk-red/20 text-risk-red">高风险</span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 space-y-1">
+                                            <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-400">-18</span></div>
+                                            <div class="flex justify-between"><span>PHY收益</span><span class="font-mono text-phy-red">+1.5~2.0</span></div>
+                                            <div class="flex justify-between"><span>受伤率</span><span class="font-mono text-risk-red">25%</span></div>
+                                            <div class="text-[10px] text-risk-red mt-1">可能触发伤病事件</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MOV Training -->
+                            <div class="training-category mb-4" data-stat="MOV">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-1 h-4 bg-mov-blue rounded"></div>
+                                    <h4 class="font-bold text-mov-blue">移动能力 (MOV) 训练</h4>
+                                    <span class="text-xs text-slate-500">当前: 70/90</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="training-option p-3 rounded-lg border border-slate-700 bg-slate-800/30 hover:border-mov-blue/50" onclick="selectTraining(this, 'MOV', 'light')">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="text-sm font-bold text-slate-300">步法恢复</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">安全</span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 space-y-1">
+                                            <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-400">-4</span></div>
+                                            <div class="flex justify-between"><span>MOV收益</span><span class="font-mono text-mov-blue">+0.3~0.6</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="training-option p-3 rounded-lg border border-slate-700 bg-slate-800/30 hover:border-mov-blue/50" onclick="selectTraining(this, 'MOV', 'standard')">
+    <div class="flex justify-between items-start mb-2">
+        <span class="text-sm font-bold text-slate-300">四方球跑位</span>
+        <span class="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">标准</span>
+    </div>
+    <div class="text-xs text-slate-500 space-y-1">
+        <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-400">-12</span></div>
+        <div class="flex justify-between"><span>MOV收益</span><span class="font-mono text-mov-blue">+0.8~1.2</span></div>
+    </div>
+</div>
+                                    </div>
+                                    <div class="training-option p-3 rounded-lg border border-slate-700 bg-slate-800/30 hover:border-mov-blue/50" onclick="selectTraining(this, 'MOV', 'intense')">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="text-sm font-bold text-slate-300">折返冲刺</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded bg-risk-red/20 text-risk-red">极限</span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 space-y-1">
+                                            <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-400">-16</span></div>
+                                            <div class="flex justify-between"><span>MOV收益</span><span class="font-mono text-mov-blue">+1.2~1.8</span></div>
+                                            <div class="text-[10px] text-amber-400 mt-1">有概率提升TEC(+0.2)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TEC Training -->
+                            <div class="training-category mb-4" data-stat="TEC">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-1 h-4 bg-tec-green rounded"></div>
+                                    <h4 class="font-bold text-tec-green">技术水平 (TEC) 训练</h4>
+                                    <span class="text-xs text-slate-500">当前: 75/90 (平台期)</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="training-option p-3 rounded-lg border border-slate-700 bg-slate-800/30 hover:border-tec-green/50" onclick="selectTraining(this, 'TEC', 'light')">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="text-sm font-bold text-slate-300">多球基础</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">安全</span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 space-y-1">
+                                            <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-400">-6</span></div>
+                                            <div class="flex justify-between"><span>TEC收益</span><span class="font-mono text-tec-green">+0.2~0.4</span></div>
+                                        </div>
+                                    </div>
+<div class="training-option p-3 rounded-lg border border-slate-700 bg-slate-800/30 hover:border-tec-green/50" onclick="selectTraining(this, 'TEC', 'standard')">
+    <div class="flex justify-between items-start mb-2">
+        <span class="text-sm font-bold text-slate-300">技术细抠</span>
+        <span class="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">标准</span>
+    </div>
+    <div class="text-xs text-slate-500 space-y-1">
+        <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-400">-10</span></div>
+        <div class="flex justify-between"><span>TEC收益</span><span class="font-mono text-tec-green">+0.5~0.8</span></div>
+        <div class="text-[10px] text-amber-400 mt-1">平台期收益-50%</div>
+    </div>
+</div>
+                                    <div class="training-option p-3 rounded-lg border border-slate-700 bg-slate-800/30 hover:border-tec-green/50 relative overflow-hidden" onclick="selectTraining(this, 'TEC', 'intense')">
+                                        <div class="absolute top-0 right-0 w-16 h-16 bg-amber-500/10 rounded-full blur-xl"></div>
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="text-sm font-bold text-slate-300">顿悟特训</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">特殊</span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 space-y-1">
+                                            <div class="flex justify-between"><span>STA消耗</span><span class="font-mono text-slate-400">-8</span></div>
+                                            <div class="flex justify-between"><span>TEC收益</span><span class="font-mono text-tec-green">+0.1/+3.0</span></div>
+                                            <div class="text-[10px] text-purple-400 mt-1">低概率触发顿悟(+3)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAC & MEN (Compact) -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="training-category" data-stat="TAC">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-1 h-4 bg-tac-purple rounded"></div>
+                                        <h4 class="font-bold text-tac-purple text-sm">战术意识 (TAC)</h4>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="training-option p-2 rounded border border-slate-700 bg-slate-800/30 text-xs" onclick="selectTraining(this, 'TAC', 'video')">
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-300 font-bold">录像分析</span>
+                                                <span class="text-tac-purple">TAC+0.5</span>
+                                            </div>
+                                            <div class="text-slate-500 text-[10px] mt-1">STA-3 | 受伤0%</div>
+                                        </div>
+                                        <div class="training-option p-2 rounded border border-slate-700 bg-slate-800/30 text-xs" onclick="selectTraining(this, 'TAC', 'sim')">
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-300 font-bold">战术模拟</span>
+                                                <span class="text-tac-purple">TAC+1.0</span>
+                                            </div>
+                                            <div class="text-slate-500 text-[10px] mt-1">STA-6 | 心智疲劳+5%</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="training-category" data-stat="MEN">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-1 h-4 bg-men-orange rounded"></div>
+                                        <h4 class="font-bold text-men-orange text-sm">心理素质 (MEN)</h4>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="training-option p-2 rounded border border-slate-700 bg-slate-800/30 text-xs" onclick="selectTraining(this, 'MEN', 'med')">
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-300 font-bold">冥想放松</span>
+                                                <span class="text-men-orange">MEN+0.3</span>
+                                            </div>
+                                            <div class="text-slate-500 text-[10px] mt-1">STA+5 | 恢复心态</div>
+                                        </div>
+                                        <div class="training-option p-2 rounded border border-slate-700 bg-slate-800/30 text-xs" onclick="selectTraining(this, 'MEN', 'pressure')">
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-300 font-bold">抗压训练</span>
+                                                <span class="text-men-orange">MEN+0.8</span>
+                                            </div>
+                                            <div class="text-slate-500 text-[10px] mt-1">STA-5 | 模拟关键分</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Training Controls & Preview -->
+                <div class="col-span-12 lg:col-span-3 space-y-4">
+                    <!-- Selected Training Preview -->
+                    <div class="glass rounded-2xl p-6 border-t-4 border-comp-blue relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-comp-blue/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                        
+                        <h3 class="font-display text-lg mb-4 text-slate-200 relative z-10">训练执行预览</h3>
+                        
+                        <div id="training-preview" class="space-y-4 relative z-10">
+                            <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <div class="text-xs text-slate-400 mb-1">选定项目</div>
+                                <div class="font-bold text-amber-400">劈杀专精训练</div>
+                                <div class="text-xs text-slate-500 mt-1">技术树项目 | 进攻线</div>
+                            </div>
+
+                            <!-- Resource Costs -->
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-slate-400">STA消耗</span>
+                                        <span class="font-mono text-risk-red">-10</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-2">
+                                        <div class="bg-risk-red h-2 rounded-full" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-slate-400">预计收益</span>
+                                        <span class="font-mono text-amber-400">TEC +1.5</span>
+                                    </div>
+                                    <div class="text-[10px] text-slate-500">平台期收益 | 瓶颈系数 0.6</div>
+                                </div>
+
+                                <div class="p-2 bg-amber-500/10 rounded border border-amber-500/20">
+                                    <div class="flex items-center gap-2 text-xs text-amber-400">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/></svg>
+                                        <span>顿悟几率: 30% (4次未提升)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Execute Button -->
+                            <button onclick="executeTraining()" class="w-full py-3 bg-comp-blue hover:bg-blue-600 text-white font-bold rounded-xl transition-all transform active:scale-95 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 group">
+                                <span>执行训练</span>
+                                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Stats -->
+                    <div class="glass rounded-2xl p-6 border border-slate-700">
+                        <h4 class="text-xs text-slate-400 uppercase tracking-wider mb-3">本周训练统计</h4>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-slate-400">已进行次数</span>
+                                <span class="font-mono text-slate-300">3/5</span>
+                            </div>
+                            
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs text-slate-500">
+                                    <span>边际递减</span>
+                                    <span class="text-risk-red">-10%</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5">
+                                    <div class="bg-gradient-to-r from-comp-blue to-risk-red h-1.5 rounded-full" style="width: 60%"></div>
+                                </div>
+                                <div class="text-[10px] text-slate-600">连续TEC训练导致的收益递减</div>
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-700 space-y-2">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">下周STA初始</span>
+                                    <span class="font-mono text-comp-blue">90</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">系数预测</span>
+                                    <span class="font-mono text-slate-300">0.96</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Training Log -->
+                    <div class="glass rounded-2xl p-4 border border-slate-700 max-h-[200px] overflow-y-auto">
+                        <h4 class="text-xs text-slate-400 uppercase tracking-wider mb-2">训练日志</h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="p-2 bg-slate-800/30 rounded border-l-2 border-amber-500">
+                                <div class="flex justify-between text-slate-300">
+                                    <span>劈杀训练</span>
+                                    <span class="text-slate-500">2小时前</span>
+                                </div>
+                                <div class="text-slate-500 mt-0.5">TEC +1.5 | 未触发顿悟</div>
+                            </div>
+                            <div class="p-2 bg-slate-800/30 rounded border-l-2 border-blue-500">
+                                <div class="flex justify-between text-slate-300">
+                                    <span>四方球跑位</span>
+                                    <span class="text-slate-500">昨天</span>
+                                </div>
+                                <div class="text-slate-500 mt-0.5">MOV +1.1 | PHY +0.2</div>
+                            </div>
+                            <div class="p-2 bg-slate-800/30 rounded border-l-2 border-red-500">
+                                <div class="flex justify-between text-slate-300">
+                                    <span>核心力量</span>
+                                    <span class="text-slate-500">2天前</span>
+                                </div>
+                                <div class="text-slate-500 mt-0.5">PHY +1.0 | 轻微拉伤(已恢复)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 2: Match HUD -->
+        <div id="view-match" class="view-section hidden h-[calc(100vh-120px)] flex flex-col">
+            <!-- Top HUD -->
+            <div class="glass-strong rounded-2xl p-6 mb-4 flex items-center justify-between border-b-2 border-slate-700">
+                <div class="flex items-center gap-8">
+                    <!-- Momentum -->
+                    <div class="w-48">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">Momentum 气势</span>
+                            <span class="text-energy-gold font-bold">↑ 高涨</span>
+                        </div>
+                        <div class="h-3 bg-slate-800 rounded-full overflow-hidden relative">
+                            <div class="absolute inset-0 bg-gradient-to-r from-slate-600 via-energy-gold to-energy-gold" style="width: 75%"></div>
+                            <div class="absolute inset-0 progress-striped opacity-30"></div>
+                        </div>
+                        <div class="text-xs text-slate-500 mt-1 text-center">连得3分 | +15% Layer2</div>
+                    </div>
+                    
+                    <!-- Match Info -->
+                    <div class="text-center">
+                        <div class="text-xs text-slate-400 mb-1">城市锦标赛决赛 | 第三局</div>
+                        <div class="flex items-center gap-4 font-display text-4xl">
+                            <div class="text-comp-blue">18</div>
+                            <div class="text-slate-600">-</div>
+                            <div class="text-risk-red">20</div>
+                        </div>
+                        <div class="flex justify-between text-xs mt-1 px-4">
+                            <span class="text-comp-blue">玩家</span>
+                            <span class="text-slate-500">BOSS</span>
+                        </div>
+                    </div>
+
+                    <!-- Boss Tag -->
+                    <div class="px-4 py-2 bg-risk-red/10 border border-risk-red/30 rounded-lg">
+                        <div class="text-xs text-risk-red font-bold">主场龙</div>
+                        <div class="text-xs text-slate-400">Layer1 +15%</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <!-- STA -->
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400 mb-1">STA 体力</div>
+                        <div class="font-display text-2xl text-slate-200">45<span class="text-lg text-slate-500">%</span></div>
+                        <div class="text-xs font-mono text-amber-500">coeff: 0.85</div>
+                    </div>
+                    <!-- FOC -->
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400 mb-1">FOC 心态</div>
+                        <div class="font-display text-2xl text-energy-gold">72</div>
+                        <div class="text-xs text-slate-500">Zone就绪</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Match Area -->
+            <div class="flex-1 glass rounded-2xl relative overflow-hidden flex items-center justify-center">
+                <div class="absolute inset-0 vignette z-10"></div>
+                <div class="absolute inset-0 opacity-20">
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-48 border-2 border-white rounded-full"></div>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-full bg-white/30"></div>
+                    <div class="absolute top-1/2 left-0 w-full h-0.5 bg-white/30"></div>
+                </div>
+
+                <div id="simulation-state" class="text-center z-20">
+                    <div class="inline-flex items-center gap-3 px-6 py-3 bg-slate-800/80 rounded-full border border-slate-600 mb-4">
+                        <div class="w-2 h-2 bg-energy-gold rounded-full animate-pulse"></div>
+                        <span class="text-slate-300 font-medium">AI模拟中... 蒙特卡洛单元</span>
+                    </div>
+                    <div class="text-slate-500 text-sm">当前节奏: <span class="text-risk-red font-bold text-lg">被动防守</span></div>
+                </div>
+
+                <div class="absolute top-20 left-20 animate-slide-up">
+                    <div class="text-growth-green font-display text-2xl drop-shadow-lg">+3 劈杀得分</div>
+                </div>
+                <div class="absolute bottom-32 right-24 animate-slide-up" style="animation-delay: 0.5s">
+                    <div class="text-risk-red font-display text-2xl drop-shadow-lg">-2 被动失误</div>
+                </div>
+            </div>
+
+            <!-- Bottom Control Bar -->
+            <div class="mt-4 flex justify-between items-center">
+                <div class="flex gap-4">
+                    <button onclick="toggleSimulation()" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-medium transition-colors border border-slate-700">
+                        暂停模拟
+                    </button>
+                    <button onclick="switchView('decision')" class="px-6 py-2 bg-risk-red/20 hover:bg-risk-red/30 text-risk-red border border-risk-red/50 rounded-lg text-sm font-medium transition-colors">
+                        手动触发关键分
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 3: Critical Decision -->
+        <div id="view-decision" class="view-section hidden h-[calc(100vh-120px)] flex flex-col relative">
+            <div class="absolute inset-0 vignette pointer-events-none z-20"></div>
+
+            <div class="glass-strong rounded-2xl p-4 mb-4 border-b-2 border-energy-gold/30 relative z-10">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-6">
+                        <div class="flex items-center gap-2 px-3 py-1 bg-risk-red/20 border border-risk-red/50 rounded-lg">
+                            <span class="w-2 h-2 bg-risk-red rounded-full animate-pulse"></span>
+                            <span class="text-risk-red font-bold text-sm">关键分</span>
+                        </div>
+                        <div class="font-display text-3xl text-white">
+                            20 <span class="text-slate-500">-</span> 20
+                        </div>
+                        <div class="text-sm text-slate-400">第三局 | 赛点压力 <span class="text-risk-red">★★★★</span></div>
+                    </div>
+                    
+                    <div class="flex items-center gap-6">
+                        <div class="text-right">
+                            <div class="text-xs text-slate-400">STA</div>
+                            <div class="font-display text-xl text-risk-red">35% <span class="text-xs font-mono text-amber-500">0.85惩罚</span></div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-slate-400">FOC</div>
+                            <div class="font-display text-xl text-energy-gold">65 <span class="text-xs text-energy-gold">ZONE可用</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3 w-full bg-slate-800 rounded-full h-1 overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-energy-gold to-risk-red animate-countdown"></div>
+                </div>
+            </div>
+
+            <div class="flex-1 grid grid-cols-3 gap-6 relative z-10">
+                <div class="glass rounded-2xl p-6 border-2 border-energy-gold/50 hover:border-energy-gold transition-all cursor-pointer hover-lift zone-active flex flex-col" onclick="selectDecision('zone')">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="px-3 py-1 bg-energy-gold text-slate-900 font-bold rounded text-sm">A</div>
+                        <div class="px-2 py-1 bg-energy-gold/20 text-energy-gold text-xs rounded border border-energy-gold/30">推荐</div>
+                    </div>
+                    <h3 class="font-display text-2xl text-white mb-2">Zone·极限劈杀</h3>
+                    <div class="space-y-3 mb-6 flex-1">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-700/50">
+                            <span class="text-slate-400 text-sm">Threat</span>
+                            <span class="font-display text-2xl text-energy-gold">142</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-700/50">
+                            <span class="text-slate-400 text-sm">成功率</span>
+                            <span class="font-display text-3xl text-green-400">72%</span>
+                        </div>
+                    </div>
+                    <div class="mt-auto text-xs text-slate-400 space-y-1">
+                        <div class="flex items-center gap-2 text-green-400">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            杀球熟练度≥75 (当前75)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl p-6 border-2 border-comp-blue/30 hover:border-comp-blue transition-all cursor-pointer hover-lift flex flex-col" onclick="selectDecision('defense')">
+                    <div class="px-3 py-1 bg-comp-blue text-white font-bold rounded text-sm w-fit mb-4">B</div>
+                    <h3 class="font-display text-2xl text-white mb-2">稳健防守过渡</h3>
+                    <div class="space-y-3 mb-6 flex-1">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-700/50">
+                            <span class="text-slate-400 text-sm">防守成功率</span>
+                            <span class="font-display text-2xl text-comp-blue">88%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl p-6 border border-slate-700 opacity-60 flex flex-col">
+                    <div class="px-3 py-1 bg-slate-700 text-slate-400 font-bold rounded text-sm w-fit mb-4">C</div>
+                    <h3 class="font-display text-2xl text-slate-400 mb-2">网前斗法</h3>
+                    <div class="mt-auto text-xs text-slate-500">熟练度不足</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 4: Post-Match Result -->
+        <div id="view-result" class="view-section hidden space-y-6">
+            <div class="glass rounded-2xl p-8 text-center border-2 border-energy-gold/30">
+                <div class="inline-block px-4 py-1 bg-energy-gold/20 text-energy-gold rounded-full text-sm font-bold mb-4 border border-energy-gold/30">
+                    比赛胜利 2-1
+                </div>
+                <h1 class="font-display text-5xl text-white mb-2">城市锦标赛冠军</h1>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // View Switching
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.view === viewName) {
+                    btn.classList.remove('text-slate-300', 'hover:text-white', 'hover:bg-slate-800');
+                    btn.classList.add('bg-comp-blue', 'text-white');
+                } else {
+                    btn.classList.add('text-slate-300', 'hover:text-white', 'hover:bg-slate-800');
+                    btn.classList.remove('bg-comp-blue', 'text-white');
+                }
+            });
+        }
+
+        // Training Tab Switching
+        function switchTrainingTab(tab) {
+            // Update buttons
+            document.getElementById('tab-tech').className = tab === 'tech' 
+                ? 'flex-1 px-6 py-4 text-sm font-medium text-white border-b-2 border-comp-blue bg-slate-800/30 transition-colors'
+                : 'flex-1 px-6 py-4 text-sm font-medium text-slate-400 hover:text-white border-b-2 border-transparent hover:bg-slate-800/20 transition-colors';
+            
+            document.getElementById('tab-basic').className = tab === 'basic'
+                ? 'flex-1 px-6 py-4 text-sm font-medium text-white border-b-2 border-comp-blue bg-slate-800/30 transition-colors'
+                : 'flex-1 px-6 py-4 text-sm font-medium text-slate-400 hover:text-white border-b-2 border-transparent hover:bg-slate-800/20 transition-colors';
+            
+            // Show/hide panels
+            document.getElementById('panel-tech').classList.toggle('hidden', tab !== 'tech');
+            document.getElementById('panel-basic').classList.toggle('hidden', tab !== 'basic');
+            
+            // Update preview based on tab
+            if(tab === 'basic') {
+                updatePreviewForBasic();
+            } else {
+                resetPreviewToTech();
+            }
+        }
+
+        // Training Selection Logic
+        let currentSelection = {
+            type: 'tech',
+            stat: 'TEC',
+            intensity: 'standard',
+            name: '劈杀专精训练'
+        };
+
+        function selectTraining(element, stat, intensity) {
+            // Remove previous selections in same category
+            const category = element.closest('.training-category');
+            category.querySelectorAll('.training-option').forEach(el => {
+                el.classList.remove('selected', 'border-'+getStatColor(stat), 'bg-'+getStatColor(stat)+'/5');
+                el.classList.add('border-slate-700', 'bg-slate-800/30');
+            });
+            
+            // Add selection to clicked
+            const color = getStatColor(stat);
+            element.classList.remove('border-slate-700', 'bg-slate-800/30');
+            element.classList.add('selected', `border-${color}`, `bg-${color}/5`);
+            
+            currentSelection = {
+                type: 'basic',
+                stat: stat,
+                intensity: intensity,
+                name: element.querySelector('.font-bold').innerText
+            };
+            
+            updatePreviewForBasic();
+        }
+
+        function getStatColor(stat) {
+            const colors = {
+                'PHY': 'phy-red',
+                'MOV': 'mov-blue', 
+                'TEC': 'tec-green',
+                'TAC': 'tac-purple',
+                'MEN': 'men-orange'
+            };
+            return colors[stat] || 'slate-400';
+        }
+
+        function updatePreviewForBasic() {
+            const gains = {
+                'light': { sta: -5, gain: '0.3~0.5', risk: '0%' },
+                'standard': { sta: -10, gain: '0.8~1.2', risk: '5%' },
+                'intense': { sta: -18, gain: '1.5~2.0', risk: '25%' },
+                'video': { sta: -3, gain: '0.5', risk: '0%' },
+                'sim': { sta: -6, gain: '1.0', risk: '0%' },
+                'med': { sta: 5, gain: '0.3', risk: '0%' },
+                'pressure': { sta: -5, gain: '0.8', risk: '10%' }
+            };
+            
+            const info = gains[currentSelection.intensity] || gains['standard'];
+            const color = getStatColor(currentSelection.stat);
+            
+            document.getElementById('training-preview').innerHTML = `
+                <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <div class="text-xs text-slate-400 mb-1">选定项目</div>
+                    <div class="font-bold text-${color}">${currentSelection.name}</div>
+                    <div class="text-xs text-slate-500 mt-1">基础训练 | ${currentSelection.stat}专项</div>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">STA消耗</span>
+                            <span class="font-mono text-${info.sta > 0 ? 'growth-green' : 'risk-red'}">${info.sta > 0 ? '+' : ''}${info.sta}</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2">
+                            <div class="bg-${info.sta > 0 ? 'growth-green' : 'risk-red'} h-2 rounded-full" style="width: ${Math.abs(info.sta)*2}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">预计收益</span>
+                            <span class="font-mono text-${color}">${currentSelection.stat} +${info.gain}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-2 bg-slate-800/50 rounded border border-slate-700">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">受伤/风险率</span>
+                            <span class="font-mono ${info.risk === '0%' ? 'text-green-400' : info.risk === '25%' ? 'text-risk-red' : 'text-amber-400'}">${info.risk}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="executeTraining()" class="w-full py-3 bg-comp-blue hover:bg-blue-600 text-white font-bold rounded-xl transition-all transform active:scale-95 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 group">
+                    <span>执行训练</span>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </button>
+            `;
+        }
+
+        function resetPreviewToTech() {
+            currentSelection = {
+                type: 'tech',
+                name: '劈杀专精训练'
+            };
+            document.getElementById('training-preview').innerHTML = `
+                <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <div class="text-xs text-slate-400 mb-1">选定项目</div>
+                    <div class="font-bold text-amber-400">劈杀专精训练</div>
+                    <div class="text-xs text-slate-500 mt-1">技术树项目 | 进攻线</div>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">STA消耗</span>
+                            <span class="font-mono text-risk-red">-10</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2">
+                            <div class="bg-risk-red h-2 rounded-full" style="width: 10%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">预计收益</span>
+                            <span class="font-mono text-amber-400">TEC +1.5</span>
+                        </div>
+                        <div class="text-[10px] text-slate-500">平台期收益 | 瓶颈系数 0.6</div>
+                    </div>
+                </div>
+                <button onclick="executeTraining()" class="w-full py-3 bg-comp-blue hover:bg-blue-600 text-white font-bold rounded-xl transition-all transform active:scale-95 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 group">
+                    <span>执行训练</span>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </button>
+            `;
+        }
+
+        function executeTraining() {
+            const btn = event.currentTarget || event.target;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-pulse">训练中...</span>';
+            btn.disabled = true;
+            
+            // 根据当前选择执行对应的训练
+            const stat = currentSelection.stat;
+            const intensity = currentSelection.intensity;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                
+                // 统一调用训练逻辑
+                let gain = 0;
+                let staCost = 0;
+                
+                // 根据类型分配数值
+                switch(intensity) {
+                    case 'light': 
+                        gain = 0.4; staCost = -5; break;
+                    case 'standard': 
+                        gain = 1.0; staCost = -10; break;
+                    case 'intense': 
+                        gain = 1.8; staCost = -18; break;
+                    case 'video': 
+                        gain = 0.5; staCost = -3; break;
+                    case 'sim': 
+                        gain = 1.0; staCost = -6; break;
+                    case 'med': 
+                        gain = 0.3; staCost = 5; break;
+                    case 'pressure': 
+                        gain = 0.8; staCost = -5; break;
+                }
+                
+                // 执行属性增加
+                if (player.stats[stat] !== undefined) {
+                    player.stats[stat] += gain;
+                    player.stats[stat] = Math.round(player.stats[stat] * 10) / 10; // 保留1位小数
+                }
+                
+                // 执行体力变化
+                player.sta += staCost;
+                if (player.sta > 100) player.sta = 100;
+                if (player.sta < 0) player.sta = 0;
+                
+                // 训练点-1
+                if (player.trainingPoints > 0) player.trainingPoints--;
+                
+                // 更新界面
+                updateUI();
+                
+                // 显示成功提示
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-24 right-4 bg-green-500/90 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
+                const staText = staCost > 0 ? `体力+${staCost}` : `体力${staCost}`;
+                notification.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        <span>${currentSelection.name}完成！${stat} +${gain} | ${staText}</span>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+                
+            }, 1500);
+        }
+
+        function focusTraining(stat) {
+            switchTrainingTab('basic');
+            // Find and click the corresponding training option
+            setTimeout(() => {
+                const category = document.querySelector(`[data-stat="${stat}"]`);
+                if(category) {
+                    const firstOption = category.querySelector('.training-option');
+                    if(firstOption) firstOption.click();
+                }
+            }, 100);
+        }
+
+        function selectDecision(type) {
+            alert(`选择了决策: ${type}`);
+        }
+
+        function toggleSimulation() {
+            alert('模拟已暂停/继续');
+        }
+
+        // Initialize
+        switchView('training');
+    </script>
+    <script>
+const player = {
+  stats: { PHY: 65, MOV: 70, TEC: 75, TAC: 60, MEN: 55 },
+  trainingPoints: 5,
+  sta: 100,
+  points: 0  // 总积分
+};
+
+// 页面加载时，把数据显示到UI上
+function updateUI() {
+  document.getElementById('phy-value').innerText = player.stats.PHY;
+  document.getElementById('mov-value').innerText = player.stats.MOV;
+  document.getElementById('tec-value').innerText = player.stats.TEC;
+  document.getElementById('tac-value').innerText = player.stats.TAC;
+  document.getElementById('men-value').innerText = player.stats.MEN;
+  document.getElementById('sta-value').innerText = player.sta; // 等下添加体力显示
+}
+
+// 页面加载完成后执行
+updateUI();
+console.log("UI已更新");
+
+// PHY训练函数
+function trainPHY() {
+  // 检查是否有训练点
+  if (player.trainingPoints <= 0) {
+    alert("本周训练次数已用完！");
+    return;
+  }
+  
+  // 检查体力
+  if (player.sta < 10) {
+    alert("体力不足！需要休息。");
+    return;
+  }
+  
+  // 执行训练：体力减少，PHY增加
+  player.sta = player.sta - 10;
+  player.stats.PHY = player.stats.PHY + 1; // 先固定+1，之后可以改成随机
+  
+  // 训练点-1
+  player.trainingPoints = player.trainingPoints - 1;
+  
+  // 更新界面
+  updateUI();
+  
+  // 提示成功
+  alert("训练完成！PHY +1，体力-10");
+}
+
+// MOV训练函数 - 四方球跑位
+function trainMOV() {
+  if (player.trainingPoints <= 0 || player.sta < 12) {
+    alert("资源不足！");
+    return;
+  }
+  player.sta -= 12;
+  player.stats.MOV += 1;
+  player.trainingPoints--;
+  updateUI();
+  alert("移动能力提升！MOV +1，体力-12");
+}
+
+// TEC训练函数 - 技术细抠
+function trainTEC() {
+  if (player.trainingPoints <= 0 || player.sta < 10) {
+    alert("资源不足！");
+    return;
+  }
+  player.sta -= 10;
+  player.stats.TEC += 0.8; // 技术水平提升慢
+  player.stats.TEC = Math.round(player.stats.TEC * 10) / 10; // 保留1位小数
+  player.trainingPoints--;
+  updateUI();
+  alert("技术水平提升！TEC +0.8，体力-10");
+}
+
+// TAC训练函数 - 录像分析
+function trainTAC_video() {
+  if (player.trainingPoints <= 0 || player.sta < 3) {
+    alert("资源不足！");
+    return;
+  }
+  player.sta -= 3;
+  player.stats.TAC += 0.5;
+  player.stats.TAC = Math.round(player.stats.TAC * 10) / 10; // 保留1位小数
+  player.trainingPoints--;
+  updateUI();
+  alert("战术意识提升！TAC +0.5，体力-3");
+}
+
+// TAC训练函数 - 战术模拟
+function trainTAC_sim() {
+  if (player.trainingPoints <= 0 || player.sta < 6) {
+    alert("资源不足！");
+    return;
+  }
+  player.sta -= 6;
+  player.stats.TAC += 1.0;
+  player.stats.TAC = Math.round(player.stats.TAC * 10) / 10; // 保留1位小数
+  player.trainingPoints--;
+  updateUI();
+  alert("战术意识提升！TAC +1.0，体力-6");
+}
+
+// MEN训练函数 - 冥想放松
+function trainMEN_med() {
+  if (player.trainingPoints <= 0) {
+    alert("本周训练次数已用完！");
+    return;
+  }
+  // 冥想恢复体力
+  player.sta += 5;
+  if (player.sta > 100) player.sta = 100; // 体力上限100
+  player.stats.MEN += 0.3;
+  player.stats.MEN = Math.round(player.stats.MEN * 10) / 10; // 保留1位小数
+  player.trainingPoints--;
+  updateUI();
+  alert("心态放松！MEN +0.3，体力+5");
+}
+
+// MEN训练函数 - 抗压训练
+function trainMEN_pressure() {
+  if (player.trainingPoints <= 0 || player.sta < 5) {
+    alert("资源不足！");
+    return;
+  }
+  player.sta -= 5;
+  player.stats.MEN += 0.8;
+  player.stats.MEN = Math.round(player.stats.MEN * 10) / 10; // 保留1位小数
+  player.trainingPoints--;
+  updateUI();
+  alert("抗压能力提升！MEN +0.8，体力-5");
+}
+
+// ==================== 比赛系统 ====================
+const match = {
+  playerScore: 0,
+  opponentScore: 0,
+  currentSet: 1, // 第几局
+  isOver: false,
+  isPlaying: false // 是否正在比赛中
+};
+
+// 开始比赛
+function startMatch() {
+  // 检查是否有训练点剩余（可选：必须用完训练才能比赛）
+  if (player.trainingPoints > 0) {
+    if (!confirm("还有未使用的训练点，确定要提前进入比赛吗？")) {
+      return;
+    }
+  }
+  
+  // 隐藏训练界面，显示比赛界面
+  document.getElementById('view-training').classList.add('hidden');
+  document.getElementById('view-match').classList.remove('hidden');
+  
+  // 更新导航按钮状态
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    if(btn.dataset.view === 'match') {
+      btn.classList.remove('text-slate-300', 'hover:text-white', 'hover:bg-slate-800');
+      btn.classList.add('bg-comp-blue', 'text-white');
+    } else {
+      btn.classList.add('text-slate-300', 'hover:text-white', 'hover:bg-slate-800');
+      btn.classList.remove('bg-comp-blue', 'text-white');
+    }
+  });
+  
+  // 重置比分
+  match.playerScore = 0;
+  match.opponentScore = 0;
+  match.currentSet = 1;
+  match.isOver = false;
+  match.isPlaying = true;
+  
+  // 显示当前比分
+  updateMatchUI();
+  
+  // 显示比赛开始提示
+  alert("周末决赛开始！目标是21分制，先得21分且领先2分者获胜。");
+  
+  // 自动开始第一分（延迟1秒）
+  setTimeout(playOnePoint, 1000);
+}
+
+// 更新比赛界面显示
+function updateMatchUI() {
+  // 更新比分显示 - 找到比赛界面的比分容器
+  const matchView = document.getElementById('view-match');
+  const scoreContainer = matchView.querySelector('.flex.items-center.gap-4.font-display.text-4xl');
+  if (scoreContainer) {
+    scoreContainer.innerHTML = `
+      <div class="text-comp-blue">${match.playerScore}</div>
+      <div class="text-slate-600">-</div>
+      <div class="text-risk-red">${match.opponentScore}</div>
+    `;
+  }
+  
+  // 更新模拟状态文字
+  const simState = document.getElementById('simulation-state');
+  if (simState && match.isPlaying && !match.isOver) {
+    simState.innerHTML = `
+      <div class="inline-flex items-center gap-3 px-6 py-3 bg-slate-800/80 rounded-full border border-slate-600 mb-4">
+        <div class="w-2 h-2 bg-energy-gold rounded-full animate-pulse"></div>
+        <span class="text-slate-300 font-medium">比赛中... ${match.playerScore} : ${match.opponentScore}</span>
+      </div>
+      <div class="text-slate-500 text-sm">21分制，领先2分获胜</div>
+    `;
+  }
+}
+
+// 进行一分对决（简化版核心逻辑）
+function playOnePoint() {
+  if (match.isOver) return;
+  
+  // 检查是否是关键分（赛点/局点）- 可选的进阶功能
+  const isCritical = (match.playerScore >= 20 || match.opponentScore >= 20) && 
+                     Math.abs(match.playerScore - match.opponentScore) < 2;
+  
+  // 关键分决策（简化版：仍自动进行，但胜率提高）
+  let winProbability = 0.5;
+  
+  if (isCritical) {
+    // 计算玩家实力（简化公式：五维平均）
+    const playerPower = (player.stats.PHY + player.stats.MOV + player.stats.TEC + player.stats.TAC + player.stats.MEN) / 5;
+    const opponentPower = 80; // 对手实力固定80
+    
+    // 关键分时根据实力调整胜率
+    const powerDiff = (playerPower - opponentPower) / 100; // -0.15 到 +0.15
+    winProbability = 0.5 + powerDiff;
+    winProbability = Math.max(0.3, Math.min(0.7, winProbability)); // 限制在30%-70%
+  } else {
+    // 普通分：计算玩家实力
+    const playerPower = (player.stats.PHY + player.stats.MOV + player.stats.TEC + player.stats.TAC + player.stats.MEN) / 5;
+    const opponentPower = 80; // 对手实力固定80
+    
+    // 随机波动 -10 到 +10
+    const luck = Math.random() * 20 - 10;
+    
+    // 判定胜负
+    const playerWins = (playerPower + luck) > opponentPower;
+    
+    // 更新比分
+    if (playerWins) {
+      match.playerScore++;
+      showEffect("得分！", "green");
+    } else {
+      match.opponentScore++;
+      showEffect("失分", "red");
+    }
+    
+    updateMatchUI();
+    
+    // 检查是否结束（21分制，领先2分）
+    if (match.playerScore >= 21 && match.playerScore - match.opponentScore >= 2) {
+      endMatch(true);
+      return;
+    } else if (match.opponentScore >= 21 && match.opponentScore - match.playerScore >= 2) {
+      endMatch(false);
+      return;
+    } else if (match.playerScore >= 30 || match.opponentScore >= 30) {
+      // 30分封顶
+      endMatch(match.playerScore > match.opponentScore);
+      return;
+    }
+    
+    // 继续下一分，间隔1秒
+    setTimeout(playOnePoint, 1000);
+    return;
+  }
+  
+  // 关键分处理（RNG判定）
+  const playerWins = Math.random() < winProbability;
+  
+  if (playerWins) {
+    match.playerScore++;
+    showEffect("关键分拿下！", "green");
+  } else {
+    match.opponentScore++;
+    showEffect("关键分失误...", "red");
+  }
+  
+  updateMatchUI();
+  
+  // 检查是否结束
+  if (match.playerScore >= 21 && match.playerScore - match.opponentScore >= 2) {
+    endMatch(true);
+  } else if (match.opponentScore >= 21 && match.opponentScore - match.playerScore >= 2) {
+    endMatch(false);
+  } else {
+    setTimeout(playOnePoint, 1000);
+  }
+}
+
+// 显示得分动画（屏幕中央）
+function showEffect(text, color) {
+  const div = document.createElement('div');
+  div.innerText = text;
+  div.style.position = 'fixed';
+  div.style.top = '50%';
+  div.style.left = '50%';
+  div.style.transform = 'translate(-50%, -50%)';
+  div.style.fontSize = '48px';
+  div.style.fontFamily = 'Oswald, sans-serif';
+  div.style.color = color === 'green' ? '#10B981' : '#EF4444';
+  div.style.pointerEvents = 'none';
+  div.style.zIndex = '9999';
+  div.style.textShadow = '0 0 20px rgba(0,0,0,0.5)';
+  div.style.animation = 'slideUp 0.5s ease-out';
+  document.body.appendChild(div);
+  
+  // 0.8秒后消失
+  setTimeout(() => div.remove(), 800);
+}
+
+// 结束比赛
+function endMatch(playerWon) {
+  match.isOver = true;
+  match.isPlaying = false;
+  
+  // 更新模拟状态显示
+  const simState = document.getElementById('simulation-state');
+  if (simState) {
+    simState.innerHTML = `
+      <div class="inline-flex items-center gap-3 px-6 py-3 ${playerWon ? 'bg-green-500/20 border-green-500' : 'bg-red-500/20 border-red-500'} rounded-full border mb-4">
+        <div class="w-3 h-3 ${playerWon ? 'bg-green-500' : 'bg-red-500'} rounded-full"></div>
+        <span class="${playerWon ? 'text-green-400' : 'text-red-400'} font-bold text-xl">${playerWon ? '胜利！' : '失败'}</span>
+      </div>
+      <div class="text-slate-300 text-lg">最终比分: ${match.playerScore} - ${match.opponentScore}</div>
+      ${playerWon ? '<div class="text-amber-400 mt-2">获得50积分！</div>' : ''}
+    `;
+  }
+  
+  // 2秒后弹出结果并返回
+  setTimeout(() => {
+    alert(playerWon ? "恭喜获胜！获得50积分" : "遗憾落败...");
+    if (playerWon) {
+      if (!player.points) player.points = 0;
+      player.points += 50;
+    }
+    
+    // 返回训练界面
+    returnToTraining();
+  }, 2000);
+}
+
+// 返回训练中心
+function returnToTraining() {
+  // 隐藏比赛界面，显示训练界面
+  document.getElementById('view-match').classList.add('hidden');
+  document.getElementById('view-training').classList.remove('hidden');
+  
+  // 更新导航按钮
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    if(btn.dataset.view === 'training') {
+      btn.classList.remove('text-slate-300', 'hover:text-white', 'hover:bg-slate-800');
+      btn.classList.add('bg-comp-blue', 'text-white');
+    } else {
+      btn.classList.add('text-slate-300', 'hover:text-white', 'hover:bg-slate-800');
+      btn.classList.remove('bg-comp-blue', 'text-white');
+    }
+  });
+  
+  // 重置下周（训练点和体力）
+  player.trainingPoints = 5;
+  player.sta = 100;
+  updateUI();
+  alert("新的一周开始了！训练点已重置为5，体力已恢复。");
+}
+</script>
+</body>
+</html>
